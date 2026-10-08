@@ -1,0 +1,149 @@
+package com.example.wslbook.telas
+
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import com.example.wslbook.Cores
+import com.example.wslbook.Livro
+import com.example.wslbook.componentes.BarraDoTopo
+import com.example.wslbook.componentes.Filtro
+import com.example.wslbook.componentes.coresDoCampo
+import com.example.wslbook.generos
+
+
+@Composable
+fun TelaNovoLivro(
+    livros: MutableList<Livro>,
+    onVoltar: () -> Unit
+) {
+    var titulo by remember { mutableStateOf("") }
+    var autor by remember { mutableStateOf("") }
+    var genero by remember { mutableStateOf(generos.first()) }
+    var totalPaginasTexto by remember { mutableStateOf("") }
+    var paginasLidasTexto by remember { mutableStateOf("") }
+    var erro by remember { mutableStateOf<String?>(null) }
+
+    Column(modifier = Modifier.fillMaxSize()) {
+
+        BarraDoTopo(titulo = "Novo livro", onVoltar = onVoltar)
+
+        Column(
+            verticalArrangement = Arrangement.spacedBy(12.dp),
+            modifier = Modifier
+                .fillMaxSize()
+                .verticalScroll(rememberScrollState())
+                .padding(16.dp)
+        ) {
+            OutlinedTextField(
+                value = titulo,
+                onValueChange = { titulo = it },
+                label = { Text("Título *") },
+                singleLine = true,
+                colors = coresDoCampo(),
+                modifier = Modifier.fillMaxWidth()
+            )
+
+            OutlinedTextField(
+                value = autor,
+                onValueChange = { autor = it },
+                label = { Text("Autor(a)") },
+                singleLine = true,
+                colors = coresDoCampo(),
+                modifier = Modifier.fillMaxWidth()
+            )
+
+            Text("Gênero", color = Cores.Creme, fontWeight = FontWeight.Bold)
+            LazyRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                items(generos) { g ->
+                    Filtro(texto = g, selecionado = genero == g, onClick = { genero = g })
+                }
+            }
+
+            OutlinedTextField(
+                value = totalPaginasTexto,
+                onValueChange = { novo -> totalPaginasTexto = novo.filter { it.isDigit() } },
+                label = { Text("Total de páginas *") },
+                singleLine = true,
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                colors = coresDoCampo(),
+                modifier = Modifier.fillMaxWidth()
+            )
+
+            OutlinedTextField(
+                value = paginasLidasTexto,
+                onValueChange = { novo -> paginasLidasTexto = novo.filter { it.isDigit() } },
+                label = { Text("Páginas já lidas (opcional)") },
+                singleLine = true,
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                colors = coresDoCampo(),
+                modifier = Modifier.fillMaxWidth()
+            )
+
+            erro?.let { mensagem ->
+                Text(mensagem, color = Cores.Vermelho, fontSize = 14.sp)
+            }
+
+            Spacer(modifier = Modifier.height(4.dp))
+
+            Button(
+                onClick = {
+                    val total = totalPaginasTexto.toIntOrNull()
+                    val lidas = paginasLidasTexto.toIntOrNull() ?: 0
+
+                    erro = when {
+                        titulo.isBlank() -> "Informe o título do livro."
+                        total == null || total <= 0 -> "Informe o total de páginas."
+                        lidas > total -> "Páginas lidas não pode ser maior que o total."
+                        else -> null
+                    }
+
+                    if (erro == null && total != null) {
+                        val novoId = (livros.maxOfOrNull { it.id } ?: 0) + 1
+                        livros.add(
+                            Livro(
+                                id = novoId,
+                                titulo = titulo.trim(),
+                                autor = autor.trim().ifBlank { "Autor desconhecido" },
+                                genero = genero,
+                                totalPaginas = total,
+                                paginasLidas = lidas
+                            )
+                        )
+                        onVoltar()
+                    }
+                },
+                colors = ButtonDefaults.buttonColors(containerColor = Cores.Vermelho),
+                shape = RoundedCornerShape(18.dp),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(50.dp)
+            ) {
+                Text("Salvar livro", color = Cores.Creme, fontWeight = FontWeight.Bold, fontSize = 16.sp)
+            }
+        }
+    }
+}
