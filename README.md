@@ -77,6 +77,6 @@ app/src/main/java/com/example/wslbook/
 Kotlin · Jetpack Compose · Material 3 · Navigation Compose (`NavHost`, `NavController`, `navigate`, `popBackStack`, rotas com argumento) · `LazyColumn`, `LazyRow`, `LazyVerticalGrid` · `Card` · `mutableStateListOf` · `remember` / `mutableStateOf` · `OutlinedTextField` (texto, numérico, várias linhas) · `Checkbox` · `TopAppBar` · `NavigationBar` · `Scaffold`
 
 ## 👥 Integrantes
-- _Nome 1_
-- _Nome 2_
-- _Nome 3_
+- Gabriele Cubas
+- Flavia Vicini
+- Michelly Wu
